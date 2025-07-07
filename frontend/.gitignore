@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.swp
+*.bak
+*.tmp
+*.log
+*.sqlite3
+*.env
+
+# Virtual environment
+venv/
+env/
+ENV/
+
+# VSCode
+.vscode/
+
+# Mac/Windows hidden files
+.DS_Store
+Thumbs.db
+
+# Video downloads (just in case)
+*.mp4
+*.webm
+*.mkv
+
+# System temp
+*.~lock.*
+*.part
+
+# OS temp
+*.tmp
+tmp/
+temp/
