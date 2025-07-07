@@ -1,11 +1,7 @@
 services:
   - type: web
-    name: youtube-downloader-backend
+    name: youtube-downloader-api
     env: python
-    buildCommand: |
-      chmod +x start.sh
-      pip install -r requirements.txt
-    startCommand: ./start.sh
-    envVars:
-      - key: PORT
-        value: 10000
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: bash start.sh
