@@ -1,68 +1,78 @@
 import streamlit as st
 import requests
+import os
 
-BACKEND_URL = "https://your-backend-url.onrender.com"
+# ✅ Your deployed backend URL
+BACKEND_URL = "https://youtube-downloader-79m2.onrender.com"
 
-st.set_page_config(page_title="YouTube Downloader", layout="centered")
+st.set_page_config(page_title="🎥 YouTube Downloader", layout="centered")
 st.title("📥 YouTube Video Downloader")
 
-# Session state for storing data
-if "video_info" not in st.session_state:
-    st.session_state.video_info = None
-if "url" not in st.session_state:
-    st.session_state.url = ""
+url = st.text_input("🔗 Paste a YouTube video link")
 
-# Input box
-url = st.text_input("🔗 Enter YouTube URL:", value=st.session_state.url)
-
-# Fetch video info
-if st.button("🔍 Fetch Info") and url:
-    with st.spinner("Fetching video info..."):
-        try:
-            res = requests.post(f"{BACKEND_URL}/info", json={"url": url})
-            data = res.json()
-
-            if "error" in data:
-                st.error("❌ " + data["error"])
-            else:
-                st.session_state.video_info = data
-                st.session_state.url = url
-        except Exception as e:
-            st.error(f"⚠️ Error: {e}")
-
-# Show info if available
-if st.session_state.video_info:
-    data = st.session_state.video_info
-    st.image(data["thumbnail"], width=480)
-    st.subheader(data["title"])
-    st.caption("⏱️ Duration: " + data["duration"])
-
-    format_options = {
-        f"{f['resolution']} • {f['ext']} • {f['filesize']} MB": f['format_id']
-        for f in data['formats']
-    }
-
-    selected = st.selectbox("🎞️ Choose Quality", list(format_options.keys()))
-    download_btn = st.button("📥 Download Video")
-
-    if download_btn:
-        format_id = format_options[selected]
-        with st.spinner("Downloading... please wait ⏳"):
+if url:
+    if st.button("🔍 Get Video Info"):
+        with st.spinner("Fetching video info..."):
             try:
-                response = requests.post(f"{BACKEND_URL}/download", json={
-                    "url": st.session_state.url,
-                    "format_id": format_id
-                })
+                response = requests.post(f"{BACKEND_URL}/info", json={"url": url})
 
-                if response.status_code == 200:
-                    st.success("✅ Download ready!")
-                    st.download_button(
-                        label="🎬 Save Video to Your Device",
-                        data=response.content,
-                        file_name=data["title"] + ".mp4",
-                        mime="video/mp4"
-                    )
+                st.write("📡 Status:", response.status_code)
+
+                if response.ok:
+                    try:
+                        data = response.json()
+
+                        st.success("✅ Video info fetched successfully!")
+                        st.image(data.get("thumbnail", ""))
+                        st.markdown(f"**🎬 Title:** {data.get('title')}")
+                        st.markdown(f"**⏱️ Duration:** {data.get('duration')}")
+
+                        formats = data.get("formats", [])
+                        qualities = [
+                            f"{f['resolution']} • {f['ext']} • {round(f['filesize'] / 1_000_000, 2)} MB"
+                            for f in formats if f.get("filesize")
+                        ]
+
+                        selected = st.selectbox("📺 Choose Quality", qualities)
+
+                        if st.button("⬇️ Download"):
+                            selected_format = formats[qualities.index(selected)]
+
+                            with st.spinner("Downloading video..."):
+                                download_res = requests.post(
+                                    f"{BACKEND_URL}/download",
+                                    json={"url": url, "format_id": selected_format["format_id"]}
+                                )
+
+                                if download_res.ok:
+                                    st.success("✅ Download complete!")
+
+                                    filename = download_res.headers.get("X-Filename", "video.mp4")
+                                    with open("temp_video.mp4", "wb") as f:
+                                        f.write(download_res.content)
+
+                                    with open("temp_video.mp4", "rb") as f:
+                                        st.download_button(
+                                            label="📥 Save to your device",
+                                            data=f,
+                                            file_name=filename,
+                                            mime="video/mp4"
+                                        )
+
+                                    os.remove("temp_video.mp4")
+
+                                else:
+                                    st.error("❌ Download failed")
+                                    st.code(download_res.text)
+
+                    except Exception as e:
+                        st.error("❌ Could not parse backend response")
+                        st.exception(e)
+                        st.code(response.text)
                 else:
-                    st.error("❌ Failed to download the video.")
-            except Exception as e:
-                st.error(f"⚠️ Error: {e}")
+                    st.error("❌ Failed to get video info")
+                    st.code(response.text)
+
+            except requests.exceptions.RequestException as e:
+                st.error("❌ Could not connect to backend")
+                st.exception(e)
