@@ -2,8 +2,8 @@
 
 This project is a full-stack **YouTube Video Downloader** built with:
 
-- 🧠 **Backend**: Flask + yt-dlp + ffmpeg
-- 🎨 **Frontend**: Streamlit
+- 🧠 **Backend**: Flask + yt-dlp + ffmpeg  
+- 🎨 **Frontend**: Streamlit  
 - 🚀 **Deployment**: Render (backend), Streamlit Cloud (frontend)
 
 ---
@@ -35,29 +35,33 @@ This project is a full-stack **YouTube Video Downloader** built with:
 
 1. Place frontend file in `/frontend/streamlit_app.py`
 2. Update backend URL inside Streamlit file to:
+   ```
+   https://your-render-backend.onrender.com
+   ```
 3. Deploy on [https://streamlit.io/cloud](https://streamlit.io/cloud)
 
 ---
 
 ## 📁 Project Structure
 
+```
 youtube_downloader/
 ├── backend/
-│ ├── app.py
-│ ├── requirements.txt
-│ ├── start.sh
-│ ├── render.yaml
-│ └── .gitignore
+│   ├── app.py
+│   ├── requirements.txt
+│   ├── start.sh
+│   └── render.yaml
 ├── frontend/
-│ ├── streamlit_app.py
-│ └── .gitignore
+│   └── streamlit_app.py
+├── .gitignore
 └── README.md
+```
 
 ---
 
 ## 🛡 Requirements
 
-- Python 3.10+
+- Python 3.10+  
 - `yt-dlp`, `ffmpeg`, `Flask`, `requests`, `streamlit`
 
 ---
