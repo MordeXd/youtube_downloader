@@ -1,6 +1,8 @@
 import streamlit as st
 import requests
 
+BACKEND_URL = "https://your-backend-url.onrender.com"
+
 st.set_page_config(page_title="YouTube Downloader", layout="centered")
 st.title("📥 YouTube Video Downloader")
 
@@ -17,7 +19,7 @@ url = st.text_input("🔗 Enter YouTube URL:", value=st.session_state.url)
 if st.button("🔍 Fetch Info") and url:
     with st.spinner("Fetching video info..."):
         try:
-            res = requests.post("http://127.0.0.1:5000/info", json={"url": url})
+            res = requests.post(f"{BACKEND_URL}/info", json={"url": url})
             data = res.json()
 
             if "error" in data:
@@ -47,7 +49,7 @@ if st.session_state.video_info:
         format_id = format_options[selected]
         with st.spinner("Downloading... please wait ⏳"):
             try:
-                response = requests.post("http://127.0.0.1:5000/download", json={
+                response = requests.post(f"{BACKEND_URL}/download", json={
                     "url": st.session_state.url,
                     "format_id": format_id
                 })
